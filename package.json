@@ -7,7 +7,7 @@
     "start": "node index",
     "dev": "nodemon index"
   },
-  "author": "lucky2bomb@gmail.com",
+  "author": "Habibulin Airat Galievich",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",

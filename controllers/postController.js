@@ -5,23 +5,6 @@ const Uuid = require("uuid");
 
 class postController {
 
-    // async createPost(req, res) {
-    //     try {
-    //         const user = await User.findOne({ _id: req.user.id });
-    //         if (!user) {
-    //             res.status(400).json({ message: "Пользователь не найден" });
-    //         }
-    //         const { title, text } = req.body;
-    //         const post = new Post({ title, text, user: user.email })
-    //         await post.save();
-    //         return res.json({ message: "Пост опубликован" });
-
-    //     } catch (error) {
-    //         console.log(error);
-    //         res.status(403).json({ message: "У вас нет доступа" });
-    //     }
-    // }
-
     async getPosts(req, res) {
         try {
             const page = req.query.page;
