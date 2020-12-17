@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
 const { secretKey } = require("../config/config");
+const UniversityPosition = require("../models/UniversityPosition");
+const SpecialtyGroup = require("../models/SpecialtyGroup");
 
 class authController {
     async registration(req, res) {
@@ -12,7 +14,16 @@ class authController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({ message: `${errors.array()[0].msg}` });
             }
-            const { email, password } = req.body;
+            const { 
+                email, 
+                password,
+                firstname,
+                lastname,
+                patronymic,
+                dateOfBirth,
+                avatarUrl,
+                specialityGroupId
+            } = req.body;
             const candidate = await User.findOne({ email });
             if (candidate) {
                 return res.status(400).json({ message: "Такой пользователь уже существует" });
@@ -20,8 +31,23 @@ class authController {
 
             const hashPassword = bcrypt.hashSync(password, 6);
             const userRole = await Role.findOne({ value: "USER" });
+            const userPosition = await UniversityPosition.findOne({ value: "студент" });
 
-            const user = new User({ email, password: hashPassword, roles: [userRole.value] });
+            const user = new User({ email, password: hashPassword, roles: [userRole.value], position: [userPosition.value] });
+
+            const specGroup = specialityGroupId && await SpecialtyGroup.findOne({ _id: specialityGroupId });
+            if (specialityGroupId && !specGroup) {
+                return res.status(400).json({ message: `Группа по специальности не найдена` });
+            }
+
+            user.firstname = firstname ? firstname : "";
+            user.lastname = lastname ? lastname : "";
+            user.patronymic = patronymic ? patronymic : "";
+            user.dateOfBirth = dateOfBirth ? dateOfBirth : "";
+            user.avatarUrl = avatarUrl ? avatarUrl : "";
+            if (specialityGroupId) {
+                user.specialityGroup = specGroup.name;
+            }
             await user.save();
             return res.json({ message: "Пользователь зарегистрирован" });
         } catch (error) {
@@ -83,10 +109,55 @@ class authController {
 
     async getProfile(req, res) {
         try {
-            const users = await User.find();
-            res.json(users);
+            const user = await User.findOne({ _id: req.user.id });
+            if (!user) {
+                return res.status(400).json({ message: `Пользователь не найден` });
+            }
+            user.password = "";
+            res.json(user);
         } catch (error) {
             console.log(error);
+            res.status(500).json({ message: "Ошибка получения пользователя" });
+        }
+    }
+
+    async editProfile(req, res) {
+        try {
+            const {
+                firstname,
+                lastname,
+                patronymic,
+                dateOfBirth,
+                avatarUrl,
+                specialityGroupId
+            } = req.body;
+
+
+            const specGroup = specialityGroupId && await SpecialtyGroup.findOne({ _id: specialityGroupId });
+            if (specialityGroupId && !specGroup) {
+                return res.status(400).json({ message: `Группа по специальности не найдена` });
+            }
+
+            const user = await User.findOne({ _id: req.user.id });
+            if (!user) {
+                return res.status(400).json({ message: `Пользователь не найден` });
+            }
+
+            user.firstname = firstname ? firstname : "";
+            user.lastname = lastname ? lastname : "";
+            user.patronymic = patronymic ? patronymic : "";
+            user.dateOfBirth = dateOfBirth ? dateOfBirth : "";
+            user.avatarUrl = avatarUrl ? avatarUrl : "";
+            if (specialityGroupId) {
+                user.specialityGroup = specGroup.name;
+            }
+            await user.save();
+
+            return res.json({ message: "данные профиля изменены" });
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Ошибка при изменении данных" });
         }
     }
 }

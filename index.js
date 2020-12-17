@@ -7,6 +7,8 @@ const { port, dbUrl } = require("./config/config");
 
 const authRouter = require("./routes/auth.routes");
 const postRouter = require("./routes/posts.routes");
+const universityRouter = require("./routes/university.routes");
+const roleRouter = require("./routes/role.routes");
 
 const corsMiddleware = require("./middleware/cors.middleware");
 const filePathMiddleware = require("./middleware/filePath.middleware");
@@ -26,6 +28,8 @@ app.use(express.json());
 
 app.use("/api/auth", authRouter);
 app.use("/api/post", postRouter);
+app.use("/api/university", universityRouter);
+app.use("/api/role", roleRouter);
 
 async function testConnectToDB() {
     try {
@@ -48,7 +52,7 @@ function checkStaticFolder() {
 const start = async () => {
     try {
         await testConnectToDB();
-        checkStaticFolder();
+        //checkStaticFolder();
         app.listen(PORT, () => {
             console.log(`Server started on port ${PORT}`);
         });

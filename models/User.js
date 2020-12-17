@@ -5,10 +5,13 @@ const User = new Schema({
     password: { type: SchemaTypes.String, required: true },
     firstname: { type: SchemaTypes.String, required: false },
     lastname: { type: SchemaTypes.String, required: false },
+    patronymic: { type: SchemaTypes.String, required: false },
     dateOfBirth: { type: SchemaTypes.Date, required: false },
-    avatar: { type: SchemaTypes.String },
+    avatarUrl: { type: SchemaTypes.String },
     // posts: [{ type: ObjectId, ref: "Post" }]
-    roles: [{type: SchemaTypes.String, ref: "Role"}]
+    specialityGroup: { type: SchemaTypes.String, ref: "SpecialtyGroup" },
+    roles: [{ type: SchemaTypes.String, ref: "Role" }],
+    position: [{ type: SchemaTypes.String, ref: "UniversityPosition" }]
 });
 
 module.exports = model("User", User);
