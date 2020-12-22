@@ -17,5 +17,6 @@ router.post("/edit-profile", authMiddleware, controller.editProfile);
 
 router.get("/auth", authMiddleware, controller.auth);
 router.get("/profile", authMiddleware, controller.getProfile);
+router.get("/someProfile", authMiddleware, controller.getSomeProfile);
 
 module.exports = router;

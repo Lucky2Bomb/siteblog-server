@@ -1,6 +1,7 @@
 const Post = require("../../models/Post");
 const { staticPath } = require("../../config/config");
 const Uuid = require("uuid");
+const User = require("../../models/User");
 const University = require("../../models/University");
 const Faculty = require("../../models/Faculty");
 const Speciality = require("../../models/Speciality");
@@ -87,6 +88,16 @@ class getUniversityController {
         }
     }
 
+    async getAllFaculties(req, res) {
+        try {
+            const faculty = await Faculty.find();
+            return res.json(faculty);
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: "Ошибка при получении факультетов" });
+        }
+    }
+
     async getSpecialities(req, res) {
         try {
             const { faculty } = req.query;
@@ -95,6 +106,16 @@ class getUniversityController {
                 res.status(400).json({ message: `Факультет ${faculty} не существует` });
             }
 
+            return res.json(speciality);
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: "Ошибка при получении специальностей" });
+        }
+    }
+
+    async getAllSpecialities(req, res) {
+        try {
+            const speciality = await Speciality.find();
             return res.json(speciality);
         } catch (error) {
             console.log(error);
@@ -113,6 +134,59 @@ class getUniversityController {
         } catch (error) {
             console.log(error);
             res.status(400).json({ message: "Ошибка при получении групп" });
+        }
+    }
+
+    async getAllSpecialityGroups(req, res) {
+        try {
+            const specialityGroup = await SpecialityGroup.find();
+            return res.json(specialityGroup);
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: "Ошибка при получении групп" });
+        }
+    }
+
+    async getAllWaySpecialityGroup(req, res) {
+        try {
+            const { nameSpecialityGroup } = req.query;
+            const specialityGroup = await SpecialityGroup.findOne({ name: nameSpecialityGroup });
+            if (!specialityGroup) {
+                res.status(400).json({ message: `Группа не существует` });
+            }
+            const speciality = await Speciality.findOne({ name: specialityGroup.speciality });
+            if (!speciality) {
+                res.json({ specialityGroup, faculty: {}, speciality: {}, specialityGroup: {} });
+            }
+            const faculty = await Faculty.findOne({ name: speciality.faculty });
+            if (!faculty) {
+                res.json({ speciality, specialityGroup, speciality: {}, specialityGroup: {} });
+            }
+            const university = await University.findOne({ name: faculty.university });
+            if (!university) {
+                res.json({ faculty, speciality, specialityGroup, specialityGroup: {} });
+            }
+            res.json({ university, faculty, speciality, specialityGroup });
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: "Произошла ошибка при поиске пути группы..." });
+        }
+    }
+
+    async getUsersInSpecialityGroup(req, res) {
+        try {
+            const specialityGroup = await SpecialityGroup.findOne({ _id: req.query.id });
+            if (!specialityGroup) {
+                res.status(400).json({ message: "Группа не найдена" });
+            }
+            const usersFromGroup = await User.find({ specialityGroup: specialityGroup.name });
+            res.json({
+                group: specialityGroup,
+                users: usersFromGroup
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Произошла ошибка при поиске пользователей группы..." });
         }
     }
 }

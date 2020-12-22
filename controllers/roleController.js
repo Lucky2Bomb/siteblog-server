@@ -46,8 +46,8 @@ class roleController {
 
     async addRoleToUser(req, res) {
         try {
-            const { userId, roleName } = req.body;
-            const user = await User.findOne({ _id: userId });
+            const { email, roleName } = req.body;
+            const user = await User.findOne({ email });
             if (!user) {
                 return res.status(400).json({ message: `Пользователь не найден` });
             }
@@ -55,7 +55,7 @@ class roleController {
             if (!role) {
                 return res.status(400).json({ message: `Такая роль не найдена` });
             }
-            user.roles.push(role.value);
+            user.roles = [role.value];
             await user.save();
             return res.json({ message: `роль ${role.value} добавлена пользователю ${user.email}` });
         } catch (error) {

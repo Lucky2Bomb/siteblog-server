@@ -37,7 +37,7 @@ class createUniversityController {
             //     return res.status(400).json({ message: `В университете "${universityName}" уже есть факультет c названием "${name}"` });
             // }
 
-            const faculty = new Faculty({ name, description, university: university.name });
+            const faculty = new Faculty({ name, description, university: university.name, universityId: university._id });
             await faculty.save();
             return res.json({ message: "Факультет создан" });
         } catch (error) {
@@ -54,7 +54,7 @@ class createUniversityController {
                 return res.status(400).json({ message: "Факультетов с таким названием не существует" });
             }
 
-            const speciality = new Speciality({ name, description, faculty: faculty.name });
+            const speciality = new Speciality({ name, description, faculty: faculty.name, facultyId: faculty._id });
             await speciality.save();
             return res.json({ message: "Специальность создана" });
         } catch (error) {
@@ -70,7 +70,7 @@ class createUniversityController {
             if (!speciality) {
                 return res.status(400).json({ message: "Специальностей с таким названием не существует" });
             }
-            const specialityGroup = new SpecialityGroup({ name, description, speciality: speciality.name });
+            const specialityGroup = new SpecialityGroup({ name, description, speciality: speciality.name, specialityId: speciality._id });
             await specialityGroup.save();
             return res.json({ message: "Группа по специальности создана" });
         } catch (error) {
@@ -97,6 +97,16 @@ class createUniversityController {
         } catch (error) {
             console.log(error);
             res.status(400).json({ message: "Ошибка при создании должности" });
+        }
+    }
+
+    async getUniversityPositions(req, res) {
+        try {
+            const universityPositions = await UniversityPosition.find();
+            return res.json(universityPositions);
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: "Ошибка при получении должностей" });
         }
     }
 }

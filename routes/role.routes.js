@@ -7,7 +7,7 @@ const roleMiddleware = require("../middleware/role.middleware");
 // /api/role
 
 router.post("/create-role", [authMiddleware, roleMiddleware(["ADMIN"])], controller.createRole);
-router.get("/get-role", [authMiddleware, roleMiddleware(["ADMIN"])], controller.getRole);
+router.get("/get-roles", controller.getRole);
 router.delete("/delete-role", [authMiddleware, roleMiddleware(["ADMIN"])], controller.deleteRole);
 
 router.post("/add-role-to-user", [authMiddleware, roleMiddleware(["ADMIN"])], controller.addRoleToUser);

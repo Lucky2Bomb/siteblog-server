@@ -14,8 +14,8 @@ class authController {
             if (!errors.isEmpty()) {
                 return res.status(400).json({ message: `${errors.array()[0].msg}` });
             }
-            const { 
-                email, 
+            const {
+                email,
                 password,
                 firstname,
                 lastname,
@@ -95,11 +95,7 @@ class authController {
             const token = jwt.sign({ id: user._id, roles: user.roles }, secretKey, { expiresIn: "12h" });
             return res.json({
                 token,
-                user: {
-                    id: user.id,
-                    email: user.email,
-                    roles: [...user.roles]
-                }
+                user
             });
         } catch (error) {
             console.log(error);
@@ -121,6 +117,20 @@ class authController {
         }
     }
 
+    async getSomeProfile(req, res) {
+        try {
+            const user = await User.findOne({ email: req.query.email });
+            if (!user) {
+                return res.status(400).json({ message: `Пользователь не найден` });
+            }
+            user.password = "";
+            res.json(user);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Ошибка получения пользователя" });
+        }
+    }
+
     async editProfile(req, res) {
         try {
             const {
@@ -129,12 +139,12 @@ class authController {
                 patronymic,
                 dateOfBirth,
                 avatarUrl,
-                specialityGroupId
+                specialityGroup
             } = req.body;
 
 
-            const specGroup = specialityGroupId && await SpecialtyGroup.findOne({ _id: specialityGroupId });
-            if (specialityGroupId && !specGroup) {
+            const specGroup = specialityGroup && await SpecialtyGroup.findOne({ name: specialityGroup });
+            if (specialityGroup && !specGroup) {
                 return res.status(400).json({ message: `Группа по специальности не найдена` });
             }
 
@@ -142,15 +152,12 @@ class authController {
             if (!user) {
                 return res.status(400).json({ message: `Пользователь не найден` });
             }
-
-            user.firstname = firstname ? firstname : "";
-            user.lastname = lastname ? lastname : "";
-            user.patronymic = patronymic ? patronymic : "";
-            user.dateOfBirth = dateOfBirth ? dateOfBirth : "";
-            user.avatarUrl = avatarUrl ? avatarUrl : "";
-            if (specialityGroupId) {
-                user.specialityGroup = specGroup.name;
-            }
+            if (firstname) user.firstname = firstname;
+            if (lastname) user.lastname = lastname;
+            if (patronymic) user.patronymic = patronymic;
+            if (dateOfBirth) user.dateOfBirth = dateOfBirth;
+            if (avatarUrl) user.avatarUrl = avatarUrl;
+            if (specialityGroup) user.specialityGroup = specGroup.name;
             await user.save();
 
             return res.json({ message: "данные профиля изменены" });

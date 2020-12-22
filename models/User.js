@@ -1,4 +1,6 @@
 const { Schema, model, SchemaTypes } = require("mongoose");
+const mongoosePaginate = require("mongoose-paginate");
+
 
 const User = new Schema({
     email: { type: SchemaTypes.String, required: true, unique: true, },
@@ -13,5 +15,7 @@ const User = new Schema({
     roles: [{ type: SchemaTypes.String, ref: "Role" }],
     position: [{ type: SchemaTypes.String, ref: "UniversityPosition" }]
 });
+
+User.plugin(mongoosePaginate);
 
 module.exports = model("User", User);

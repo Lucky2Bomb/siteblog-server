@@ -2,9 +2,11 @@ const Post = require("../../models/Post");
 const { staticPath } = require("../../config/config");
 const Uuid = require("uuid");
 const University = require("../../models/University");
+const User = require("../../models/User");
 const Faculty = require("../../models/Faculty");
 const Speciality = require("../../models/Speciality");
 const SpecialityGroup = require("../../models/SpecialtyGroup");
+const UniversityPosition = require("../../models/UniversityPosition");
 
 class deleteUniversityController {
 
@@ -56,15 +58,37 @@ class deleteUniversityController {
     async deleteSpecialityGroup(req, res) {
         try {
             const { name } = req.query;
-            const specialityGroup = await Speciality.findOne({ name });
+            const specialityGroup = await SpecialityGroup.findOne({ name });
             if (!specialityGroup) {
-                return res.status(400).json({ message: "Групп с таким названием не существует" });
+                return res.status(400).json({ message: "Группы с таким названием не существует" });
             }
+
+            const users = await User.find({ specialityGroup: specialityGroup.name });
+            users.map(async (user) => {
+                user.specialityGroup = "";
+                await user.save();
+            });
             await specialityGroup.remove();
+
             return res.json({ message: "Группа по специальности удалена" });
         } catch (error) {
             console.log(error);
             res.status(400).json({ message: "Ошибка при удалении группы" });
+        }
+    }
+
+    async deleteUniversityPosition(req, res) {
+        try {
+            const { positionId } = req.query;
+            const up = await UniversityPosition.findOne({ _id: positionId });
+            if (!up) {
+                return res.status(400).json({ message: "Должности с таким названием не существует" });
+            }
+            await up.remove();
+            return res.json({ message: "Должность удалена" });
+        } catch (error) {
+            console.log(error);
+            res.status(400).json({ message: "Ошибка при удалении должности" });
         }
     }
 }

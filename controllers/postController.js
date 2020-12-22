@@ -3,6 +3,7 @@ const Post = require("../models/Post");
 const { staticPath } = require("../config/config");
 const Uuid = require("uuid");
 const Comment = require("../models/Comment");
+const fs = require("fs");
 
 class postController {
 
@@ -42,8 +43,8 @@ class postController {
     async getCommentsOnPost(req, res) {
         try {
             const postId = req.query.postId;
-            const comments = await Comment.find({post: postId});
-            if(!comments) {
+            const comments = await Comment.find({ post: postId });
+            if (!comments) {
                 res.status(400).json({ message: "Комментарии к посту не найдены" });
             }
 
@@ -61,7 +62,7 @@ class postController {
             if (!user) {
                 res.status(400).json({ message: "Пользователь не найден" });
             }
-            if(!post) {
+            if (!post) {
                 res.status(400).json({ message: "Пост не найден" });
             }
             const text = req.body.text;
@@ -76,12 +77,12 @@ class postController {
 
     async deleteComment(req, res) {
         try {
-            const comment = await Comment.findOne({_id: req.query.id});
-            if(!comment) {
+            const comment = await Comment.findOne({ _id: req.query.id });
+            if (!comment) {
                 res.status(400).json({ message: "Комментарий не найден" });
             }
             await comment.delete();
-            res.json({message: "комментарий удалён"});
+            res.json({ message: "комментарий удалён" });
         } catch {
             console.log(error);
             res.status(500).json({ message: "Ошибка при удалении комментария" });
@@ -90,12 +91,12 @@ class postController {
 
     async deletePost(req, res) {
         try {
-            const post = await Post.findOne({_id: req.query.id});
-            if(!post) {
+            const post = await Post.findOne({ _id: req.query.id });
+            if (!post) {
                 res.status(400).json({ message: "Пост не найден" });
             }
             await post.delete();
-            res.json({message: "пост удалён"});
+            res.json({ message: "пост удалён" });
         } catch {
             console.log(error);
             res.status(500).json({ message: "Ошибка при удалении поста" });
@@ -135,6 +136,74 @@ class postController {
         } catch (error) {
             console.log(error);
             res.status(500).json({ message: "Ошибка при загрузке файла" });
+        }
+    }
+
+    async deleteImagePost(req, res) {
+        try {
+            const post = await Post.findOne({ _id: req.query.postId });
+            if (!post) {
+                res.status(400).json({ message: "Пост не найден" });
+            }
+            
+            fs.unlink(`${staticPath}\\${post.fileName}`, (err) => {
+                if(err) {
+                    console.log(err)
+                }
+            });
+
+            post.fileName = "";
+            await post.save();
+            res.json({ message: "картинка поста удалена" });
+        } catch {
+            console.log(error);
+            res.status(500).json({ message: "Ошибка при удалении картинки поста" });
+        }
+    }
+
+    async addImagePost(req, res) {
+        try {
+            const { postId } = req.body;
+            const post = await Post.findOne({ _id: postId });
+            const file = req.files.file;
+            if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+                const fileName = `${Uuid.v4()}.${file.mimetype.split('/')[1]}`;
+                post.fileName = fileName;
+
+                file.mv(`${staticPath}\\${fileName}`);
+
+                //for glitch.com
+                //file.mv(`static/${fileName}`);
+
+                await post.save();
+                return res.json({ message: "изображение добавлено" });
+            } else {
+                res.status(500).json({ message: "Неверный формат загружаемой картинки" });
+            }
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Ошибка при загрузке файла" });
+        }
+    }
+
+    async editPost(req, res) {
+        try {
+            const { postId, title, text } = req.body;
+            const post = await Post.findOne({ _id: postId });
+            if (!post) {
+                res.status(400).json({ message: "Пост не найден" });
+            }
+
+            post.title = title;
+            post.text = text;
+            await post.save();
+            return res.json({ message: "Пост изменён" });
+
+
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({ message: "Ошибка при загрузке поста" });
         }
     }
 }

@@ -9,6 +9,7 @@ const authRouter = require("./routes/auth.routes");
 const postRouter = require("./routes/posts.routes");
 const universityRouter = require("./routes/university.routes");
 const roleRouter = require("./routes/role.routes");
+const usersRouter = require("./routes/users.routes");
 
 const corsMiddleware = require("./middleware/cors.middleware");
 const filePathMiddleware = require("./middleware/filePath.middleware");
@@ -30,6 +31,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/post", postRouter);
 app.use("/api/university", universityRouter);
 app.use("/api/role", roleRouter);
+app.use("/api/users", usersRouter);
 
 async function testConnectToDB() {
     try {

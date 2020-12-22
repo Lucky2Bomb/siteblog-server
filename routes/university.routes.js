@@ -13,7 +13,6 @@ router.post("/create-university", [authMiddleware, roleMiddleware(["ADMIN"])], c
 router.post("/create-faculty", [authMiddleware, roleMiddleware(["ADMIN"])], createUniversityController.createFaculty);
 router.post("/create-speciality", [authMiddleware, roleMiddleware(["ADMIN"])], createUniversityController.createSpeciality);
 router.post("/create-speciality-group", [authMiddleware, roleMiddleware(["ADMIN"])], createUniversityController.createSpecialityGroup);
-router.post("/create-university-position", [authMiddleware, roleMiddleware(["ADMIN"])], createUniversityController.createUniversityPosition);
 
 router.delete("/delete-university", [authMiddleware, roleMiddleware(["ADMIN"])], deleteUniversityController.deleteUniversity);
 router.delete("/delete-faculty", [authMiddleware, roleMiddleware(["ADMIN"])], deleteUniversityController.deleteFaculty);
@@ -29,7 +28,16 @@ router.get("/get-universities", getUniversityController.getUniversities);
 router.get("/get-faculties", getUniversityController.getFaculties);
 router.get("/get-specialities", getUniversityController.getSpecialities);
 router.get("/get-speciality-groups", getUniversityController.getSpecialityGroups);
+router.get("/get-all-faculties", getUniversityController.getAllFaculties);
+router.get("/get-all-specialities", getUniversityController.getAllSpecialities);
+router.get("/get-all-speciality-groups", getUniversityController.getAllSpecialityGroups);
+router.get("/get-all-way-speciality-group", getUniversityController.getAllWaySpecialityGroup);
+router.get("/group", getUniversityController.getUsersInSpecialityGroup);
 
 router.get("/get-university-data", getUniversityController.getUniversityData);
 
+router.get("/get-university-positions", createUniversityController.getUniversityPositions);
+router.post("/create-university-position", [authMiddleware, roleMiddleware(["ADMIN"])], createUniversityController.createUniversityPosition);
+router.post("/set-user-university-position", [authMiddleware, roleMiddleware(["ADMIN"])], editUniversityController.setUserPosition);
+router.delete("/delete-university-position", [authMiddleware, roleMiddleware(["ADMIN"])], deleteUniversityController.deleteUniversityPosition);
 module.exports = router;
